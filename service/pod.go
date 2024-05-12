@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -78,6 +79,22 @@ func (p *pod) DeletePod(podName, namespace string) (err error) {
 	if err != nil {
 		logger.Error("delete pod error: ", err.Error())
 		return errors.New("delete error" + err.Error())
+	}
+	return nil
+}
+
+func (p *pod) UpdatePod(podName, namespace, content string) (err error) {
+	pod := &corev1.Pod{}
+	err = json.Unmarshal([]byte(content), pod)
+	if err != nil {
+		logger.Error("unmarshal pod error," + err.Error())
+		return errors.New("unmarshal pod error" + err.Error())
+	}
+
+	_, err = K8s.ClientSet.CoreV1().Pods(namespace).Update(context.TODO(), pod, metav1.UpdateOptions{})
+	if err != nil {
+		logger.Error("update pod error, " + err.Error())
+		return errors.New("update pod error" + err.Error())
 	}
 	return nil
 }
