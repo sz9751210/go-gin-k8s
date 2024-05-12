@@ -2,6 +2,7 @@ package service
 
 import (
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -45,5 +46,20 @@ func (d *dataSelector) Less(i, j int) bool {
 
 func (d *dataSelector) Sort() *dataSelector {
 	sort.Sort(d)
+	return d
+}
+
+func (d *dataSelector) Filter() *dataSelector {
+	if d.DataSelect.Filter.Name == "" {
+		return d
+	}
+	filtered := []DataCell{}
+	for _, value := range d.GenericDataList {
+		objName := value.GetName()
+		if strings.Contains(objName, d.DataSelect.Filter.Name) {
+			filtered = append(filtered, value)
+		}
+	}
+	d.GenericDataList = filtered
 	return d
 }
