@@ -73,6 +73,15 @@ func (p *pod) GetDetail(podName, namespace string) (podDetail *corev1.Pod, err e
 	return pod, nil
 }
 
+func (p *pod) DeletePod(podName, namespace string) (err error) {
+	err = K8s.ClientSet.CoreV1().Pods(namespace).Delete(context.TODO(), podName, metav1.DeleteOptions{})
+	if err != nil {
+		logger.Error("delete pod error: ", err.Error())
+		return errors.New("delete error" + err.Error())
+	}
+	return nil
+}
+
 // toCells 方法將 corev1.Pod 的切片轉換成 DataCell 的切片。
 func (p *pod) toCells(pods []corev1.Pod) []DataCell {
 	cells := make([]DataCell, len(pods)) // 創建與 pods 相同長度的 DataCell 切片
