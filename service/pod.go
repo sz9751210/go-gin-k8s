@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/wonderivan/logger"
 	corev1 "k8s.io/api/core/v1"
@@ -44,6 +45,17 @@ func (p *pod) GetPods(filterName, namespace string, limit, page int) (podsResp *
 
 	data := filtered.Sort().Paginate()
 	pods := p.fromCells(data.GenericDataList)
+
+	fmt.Println("處理前的 pods 列表: ")
+	for _, pod := range podList.Items {
+		fmt.Println(pod.Name, pod.CreationTimestamp.Time)
+	}
+
+	fmt.Println("處理後的 pods 列表: ")
+	for _, pod := range pods {
+		fmt.Println(pod.Name, pod.CreationTimestamp.Time)
+	}
+
 	podsResp = &PodsResp{
 		Total: total,
 		Items: pods,
