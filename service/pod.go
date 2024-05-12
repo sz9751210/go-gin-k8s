@@ -64,6 +64,15 @@ func (p *pod) GetPods(filterName, namespace string, limit, page int) (podsResp *
 
 }
 
+func (p *pod) GetDetail(podName, namespace string) (podDetail *corev1.Pod, err error) {
+	pod, err := K8s.ClientSet.CoreV1().Pods(namespace).Get(context.TODO(), podName, metav1.GetOptions{})
+	if err != nil {
+		logger.Error("get pod error: ", err.Error())
+		return nil, errors.New("get pod error" + err.Error())
+	}
+	return pod, nil
+}
+
 // toCells 方法將 corev1.Pod 的切片轉換成 DataCell 的切片。
 func (p *pod) toCells(pods []corev1.Pod) []DataCell {
 	cells := make([]DataCell, len(pods)) // 創建與 pods 相同長度的 DataCell 切片
