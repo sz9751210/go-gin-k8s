@@ -63,3 +63,23 @@ func (d *dataSelector) Filter() *dataSelector {
 	d.GenericDataList = filtered
 	return d
 }
+
+func (d *dataSelector) Paginate() *dataSelector {
+	limit := d.DataSelect.Paginate.Limit
+	page := d.DataSelect.Paginate.Page
+	if limit <= 0 || page <= 0 {
+		return d
+	}
+	startIndex := (page - 1) * limit
+	endIndex := page * limit
+	if startIndex >= len(d.GenericDataList) {
+		d.GenericDataList = []DataCell{}
+		return d
+	}
+	if endIndex > len(d.GenericDataList) {
+		endIndex = len(d.GenericDataList)
+	}
+
+	d.GenericDataList = d.GenericDataList[startIndex:endIndex]
+	return d
+}
