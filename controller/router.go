@@ -20,5 +20,6 @@ func (r *router) Init(router *gin.Engine) {
 		// 	})
 		// })
 		GET("/api/k8s/pods", Pod.GetPods).
-		GET("/api/k8s/pod/detail", Pod.GetPodDetail)
+		GET("/api/k8s/pod/detail", Pod.GetPodDetail).
+		DELETE("/api/k8s/pod/delete", Pod.DeletePod)
 }
