@@ -2,12 +2,13 @@ import { createRouter, createWebHistory } from "vue-router";
 // 導入進度條
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
+import Layout from "@/layout/Layout.vue";
 
 const routes = [
   {
     path: "/layout",
     icon: "odometer",
-    component: () => import("@/layout/Layout.vue"),
+    component: Layout,
     children: [
       {
         path: "/home",
@@ -15,6 +16,22 @@ const routes = [
         icon: "odometer",
         meta: { title: "Home", requireAuth: false },
         component: () => import("@/views/home/Home.vue"),
+      },
+    ],
+  },
+  {
+    path: "/workload",
+    name: "workload",
+    component: Layout,
+    icon: "menu",
+    meta: { title: "Workload", requireAuth: true },
+    children: [
+      {
+        path: "/workload/pod",
+        name: "Pod",
+        icon: "el-icon-document-add",
+        meta: { title: "Pod", requireAuth: true },
+        component: () => import("@/views/workload/Pod.vue"),
       },
     ],
   },
