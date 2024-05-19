@@ -2,6 +2,6 @@ package config
 
 const (
 	ListerAddr     = "0.0.0.0:9090"
-	Kubeconfig     = "/Users/alan/code/k8s-go-gin/kubeconfig"
+	Kubeconfig     = "/Users/alan/.kube/config"
 	PodLogTailLine = 1000
 )
