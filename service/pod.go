@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -23,6 +24,11 @@ type pod struct {
 type PodsResp struct {
 	Total int          `json:"total"`
 	Items []corev1.Pod `json:"items"`
+}
+
+type PodsNp struct {
+	Namespace string
+	PodNum    int
 }
 
 func (p *pod) GetPods(filterName, namespace string, limit, page int) (podsResp *PodsResp, err error) {
@@ -134,6 +140,29 @@ func (p *pod) GetPodLog(containerName, podName, namespace string) (log string, e
 		return "", errors.New("copy pod log error" + err.Error())
 	}
 	return buf.String(), nil
+}
+
+// get pod number per namespace
+func (p *pod) GetPodNumPerNp() (podsNps []*PodsNp, err error) {
+	namespaceList, err := K8s.ClientSet.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		logger.Error("get namespace list error: ", err.Error())
+		return nil, errors.New("get namespace list error" + err.Error())
+	}
+	for _, namesapce := range namespaceList.Items {
+		podList, err := K8s.ClientSet.CoreV1().Pods(namesapce.Name).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			logger.Error("get pod list error: ", err.Error())
+			return nil, errors.New("get pod list error" + err.Error())
+		}
+		podsNp := &PodsNp{
+			Namespace: namesapce.Name,
+			PodNum:    len(podList.Items),
+		}
+		podsNps = append(podsNps, podsNp)
+	}
+
+	return podsNps, nil
 }
 
 // toCells 方法將 corev1.Pod 的切片轉換成 DataCell 的切片。
