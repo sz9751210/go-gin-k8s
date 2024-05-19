@@ -19,5 +19,6 @@ func (r *router) Init(router *gin.Engine) {
 		// 		"data":    nil,
 		// 	})
 		// })
-		GET("/api/k8s/pods", Pod.GetPods)
+		GET("/api/k8s/pods", Pod.GetPods).
+		GET("/api/k8s/pod/detail", Pod.GetPodDetail)
 }
