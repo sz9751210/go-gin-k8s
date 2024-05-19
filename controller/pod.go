@@ -137,3 +137,32 @@ func (p *pod) UpdatePod(ctx *gin.Context) {
 		"data":    nil,
 	})
 }
+
+// get pod container
+func (p *pod) GetPodContainers(ctx *gin.Context) {
+	params := new(struct {
+		PodName   string `form:"pod_name"`
+		Namespace string `form:"namespace"`
+	})
+	if err := ctx.Bind(params); err != nil {
+		logger.Error("bind params error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "bind params error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	data, err := service.Pod.GetPodContainers(params.PodName, params.Namespace)
+	if err != nil {
+		logger.Error("get pod containers error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get pod containers error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "get pod containers success",
+		"data":    data,
+	})
+}

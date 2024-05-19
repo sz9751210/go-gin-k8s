@@ -22,5 +22,7 @@ func (r *router) Init(router *gin.Engine) {
 		GET("/api/k8s/pods", Pod.GetPods).
 		GET("/api/k8s/pod/detail", Pod.GetPodDetail).
 		DELETE("/api/k8s/pod/delete", Pod.DeletePod).
-		PUT("/api/k8s/pod/update", Pod.UpdatePod)
+		PUT("/api/k8s/pod/update", Pod.UpdatePod).
+		GET("/api/k8s/pod/containers", Pod.GetPodContainers)
+
 }
