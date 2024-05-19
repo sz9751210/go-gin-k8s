@@ -11,6 +11,16 @@ const routes = [
     meta: { title: "Home", requireAuth: false },
     component: () => import("@/views/home/Home.vue"),
   },
+  {
+    path: "/404",
+    name: "404",
+    meta: { title: "Page Not Found", requireAuth: false },
+    component: () => import("@/views/common/404.vue"),
+  },
+  {
+    path:'/:pathMatch(.*)',
+    redirect: '/404'
+  }
 ];
 
 const router = createRouter({
