@@ -196,3 +196,19 @@ func (p *pod) GetPodLog(ctx *gin.Context) {
 		"data":    data,
 	})
 }
+
+func (p *pod) GetPodNumPerNp(ctx *gin.Context) {
+	data, err := service.Pod.GetPodNumPerNp()
+	if err != nil {
+		logger.Error("get pod number per namespace error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get pod number per namespace error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "get pod number per namespace success",
+		"data":    data,
+	})
+}
