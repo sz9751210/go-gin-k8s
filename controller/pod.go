@@ -95,9 +95,9 @@ func (p *pod) DeletePod(ctx *gin.Context) {
 	}
 	err := service.Pod.DeletePod(params.PodName, params.Namespace)
 	if err != nil {
-		logger.Error("get pod detail error: " + err.Error())
+		logger.Error("delete pod error: " + err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "get pod detail error" + err.Error(),
+			"message": "delete pod error" + err.Error(),
 			"data":    nil,
 		})
 		return
@@ -125,9 +125,9 @@ func (p *pod) UpdatePod(ctx *gin.Context) {
 	}
 	err := service.Pod.UpdatePod(params.PodName, params.Namespace, params.Content)
 	if err != nil {
-		logger.Error("get pod detail error: " + err.Error())
+		logger.Error("update pod error: " + err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "get pod detail error" + err.Error(),
+			"message": "update pod error" + err.Error(),
 			"data":    nil,
 		})
 		return
