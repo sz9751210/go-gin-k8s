@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"k8s-go-gin/config"
 
 	"github.com/wonderivan/logger"
 	corev1 "k8s.io/api/core/v1"
@@ -108,6 +110,30 @@ func (p *pod) GetPodContainers(podName, namespace string) (containers []string, 
 		containers = append(containers, container.Name)
 	}
 	return containers, nil
+}
+
+func (p *pod) GetPodLog(containerName, podName, namespace string) (log string, err error) {
+	lineLimit := int64(config.PodLogTailLine)
+	option := &corev1.PodLogOptions{
+		Container: containerName,
+		TailLines: &lineLimit,
+	}
+
+	req := K8s.ClientSet.CoreV1().Pods(namespace).GetLogs(podName, option)
+	podLogs, err := req.Stream(context.TODO())
+	if err != nil {
+		logger.Error(errors.New("get pod log error" + err.Error()))
+		return "", errors.New("get pod log error" + err.Error())
+	}
+	defer podLogs.Close()
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, podLogs)
+	// _, err = buf.ReadFrom(podLogs)
+	if err != nil {
+		logger.Error(errors.New("copy pod log error" + err.Error()))
+		return "", errors.New("copy pod log error" + err.Error())
+	}
+	return buf.String(), nil
 }
 
 // toCells 方法將 corev1.Pod 的切片轉換成 DataCell 的切片。
