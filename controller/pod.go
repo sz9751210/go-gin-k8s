@@ -107,3 +107,33 @@ func (p *pod) DeletePod(ctx *gin.Context) {
 		"data":    nil,
 	})
 }
+
+// update
+func (p *pod) UpdatePod(ctx *gin.Context) {
+	params := new(struct {
+		PodName   string `json:"pod_name"`
+		Namespace string `json:"namespace"`
+		Content   string `json:"content"`
+	})
+	if err := ctx.ShouldBindJSON(params); err != nil {
+		logger.Error("bind params error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "bind params error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	err := service.Pod.UpdatePod(params.PodName, params.Namespace, params.Content)
+	if err != nil {
+		logger.Error("get pod detail error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get pod detail error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "update pod success",
+		"data":    nil,
+	})
+}
