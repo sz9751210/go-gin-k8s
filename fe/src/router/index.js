@@ -5,11 +5,18 @@ import "nprogress/nprogress.css";
 
 const routes = [
   {
-    path: "/home",
-    name: "home",
+    path: "/layout",
     icon: "odometer",
-    meta: { title: "Home", requireAuth: false },
-    component: () => import("@/views/home/Home.vue"),
+    component: () => import("@/layout/Layout.vue"),
+    children: [
+      {
+        path: "/home",
+        name: "home",
+        icon: "odometer",
+        meta: { title: "Home", requireAuth: false },
+        component: () => import("@/views/home/Home.vue"),
+      },
+    ],
   },
   {
     path: "/404",
@@ -18,9 +25,9 @@ const routes = [
     component: () => import("@/views/common/404.vue"),
   },
   {
-    path:'/:pathMatch(.*)',
-    redirect: '/404'
-  }
+    path: "/:pathMatch(.*)",
+    redirect: "/404",
+  },
 ];
 
 const router = createRouter({
