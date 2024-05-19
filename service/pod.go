@@ -118,7 +118,7 @@ func (p *pod) GetPodContainers(podName, namespace string) (containers []string, 
 	return containers, nil
 }
 
-func (p *pod) GetPodLog(containerName, podName, namespace string) (log string, err error) {
+func (p *pod) GetPodLog(podName, containerName, namespace string) (log string, err error) {
 	lineLimit := int64(config.PodLogTailLine)
 	option := &corev1.PodLogOptions{
 		Container: containerName,

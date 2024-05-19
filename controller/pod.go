@@ -166,3 +166,33 @@ func (p *pod) GetPodContainers(ctx *gin.Context) {
 		"data":    data,
 	})
 }
+
+// get pod log
+func (p *pod) GetPodLog(ctx *gin.Context) {
+	params := new(struct {
+		PodName   string `form:"pod_name"`
+		Container string `form:"container"`
+		Namespace string `form:"namespace"`
+	})
+	if err := ctx.Bind(params); err != nil {
+		logger.Error("bind params error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "bind params error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	data, err := service.Pod.GetPodLog(params.PodName, params.Container, params.Namespace)
+	if err != nil {
+		logger.Error("get pod log error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get pod log error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "get pod log success",
+		"data":    data,
+	})
+}
