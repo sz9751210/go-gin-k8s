@@ -13,7 +13,7 @@ var Deployment deployment
 type deployment struct {
 }
 
-func (d *deployment) GetDeployments(ctx *gin.Context){
+func (d *deployment) GetDeployments(ctx *gin.Context) {
 	params := new(struct {
 		FilterName string `form:"filter_name"`
 		Namespace  string `form:"namespace"`
@@ -34,6 +34,34 @@ func (d *deployment) GetDeployments(ctx *gin.Context){
 		logger.Error("get deployments error: " + err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get deployments error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":    data,
+	})
+}
+
+func (d *deployment) GetDeploymentDetail(ctx *gin.Context) {
+	params := new(struct {
+		DeploymentName string `form:"deployment_name"`
+		Namespace      string `form:"namespace"`
+	})
+	if err := ctx.Bind(params); err != nil {
+		logger.Error("bind params error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "bind params error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	data, err := service.Deployment.GetDeploymentDetail(params.DeploymentName, params.Namespace)
+	if err != nil {
+		logger.Error("get deployment detail error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get deployment detail error" + err.Error(),
 			"data":    nil,
 		})
 		return

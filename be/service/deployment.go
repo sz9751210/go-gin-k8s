@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,6 +50,16 @@ func(d *deployment) GetDeployments(filterName, namespace string, limit, page int
 
 	return deploymentsResp, nil
 }
+
+func(d *deployment) GetDeploymentDetail(deloymentName, namespace string)(deployment *appsv1.Deployment, err error) {
+	deployment, err = K8s.ClientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deloymentName, metav1.GetOptions{})
+	if err != nil {
+		logger.Error("get deployment detail error: ", err.Error())
+		return nil, errors.New("get deployment detail error" + err.Error())
+	}
+	return deployment, nil
+}
+
 
 // toCells 方法將 corev1.Pod 的切片轉換成 DataCell 的切片。
 func (d *deployment) toCells(deployments []appsv1.Deployment) []DataCell {

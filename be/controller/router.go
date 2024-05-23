@@ -28,5 +28,6 @@ func (r *router) Init(router *gin.Engine) {
 		GET("/api/k8s/pod/log", Pod.GetPodLog).
 		GET("/api/k8s/pod/numpernp", Pod.GetPodNumPerNp).
 		// deployment操作
-		GET("/api/k8s/deployments", Deployment.GetDeployments)
+		GET("/api/k8s/deployments", Deployment.GetDeployments).
+		GET("/api/k8s/deployment/detail", Deployment.GetDeploymentDetail).
 }
