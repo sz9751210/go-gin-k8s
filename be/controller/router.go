@@ -19,12 +19,14 @@ func (r *router) Init(router *gin.Engine) {
 		// 		"data":    nil,
 		// 	})
 		// })
+		// pod操作
 		GET("/api/k8s/pods", Pod.GetPods).
 		GET("/api/k8s/pod/detail", Pod.GetPodDetail).
 		DELETE("/api/k8s/pod/delete", Pod.DeletePod).
 		PUT("/api/k8s/pod/update", Pod.UpdatePod).
 		GET("/api/k8s/pod/containers", Pod.GetPodContainers).
 		GET("/api/k8s/pod/log", Pod.GetPodLog).
-		GET("/api/k8s/pod/numpernp", Pod.GetPodNumPerNp)
-
+		GET("/api/k8s/pod/numpernp", Pod.GetPodNumPerNp).
+		// deployment操作
+		GET("/api/k8s/deployments", Deployment.GetDeployments)
 }
