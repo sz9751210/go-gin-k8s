@@ -168,6 +168,15 @@ func (d *deployment) CreateDeployment(data *DeployCreate) error {
 	return nil
 }
 
+func (d *deployment) DeleteDeployment(deploymentName, namespace string) error {
+	err := K8s.ClientSet.AppsV1().Deployments(namespace).Delete(context.TODO(), deploymentName, metav1.DeleteOptions{})
+	if err != nil {
+		logger.Error("delete deployment error: ", err.Error())
+		return errors.New("delete deployment error: " + err.Error())
+	}
+	return nil
+}
+
 // toCells 方法將 corev1.Pod 的切片轉換成 DataCell 的切片。
 func (d *deployment) toCells(deployments []appsv1.Deployment) []DataCell {
 	cells := make([]DataCell, len(deployments)) // 創建與 pods 相同長度的 DataCell 切片
