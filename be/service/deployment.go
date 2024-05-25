@@ -6,7 +6,10 @@ import (
 
 	"github.com/wonderivan/logger"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 var Deployment deployment
@@ -17,6 +20,19 @@ type deployment struct{}
 type DeploymentsResp struct {
 	Total int                 `json:"total"`
 	Items []appsv1.Deployment `json:"items"`
+}
+
+type DeployCreate struct {
+	Name            string            `json:"name"`
+	Namespace       string            `json:"namespace"`
+	Replicas        int32             `json:"replicas"`
+	Image           string            `json:"image"`
+	Label           map[string]string `json:"label"`
+	Cpu             string            `json:"cpu"`
+	Memory          string            `json:"memory"`
+	ContainerPort   int32             `json:"container_port"`
+	HealthCheck     bool              `json:"health_check"`
+	HealthCheckPath string            `json:"health_path"`
 }
 
 func (d *deployment) GetDeployments(filterName, namespace string, limit, page int) (deploymentsResp *DeploymentsResp, err error) {
@@ -75,6 +91,81 @@ func (d *deployment) ScaleDeployment(deploymentName, namespace string, scaleNum 
 		return 0, errors.New("update deployment scale error" + err.Error())
 	}
 	return newScale.Spec.Replicas, nil
+}
+
+func (d *deployment) CreateDeployment(data *DeployCreate) error {
+	replicas := data.Replicas
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      data.Name,
+			Namespace: data.Namespace,
+			Labels:    data.Label,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: data.Label,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: data.Label,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  data.Name,
+							Image: data.Image,
+							Ports: []corev1.ContainerPort{
+								{
+									Name:          "http",
+									ContainerPort: data.ContainerPort,
+								},
+							},
+							Resources: corev1.ResourceRequirements{
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse(data.Cpu),
+									corev1.ResourceMemory: resource.MustParse(data.Memory),
+								},
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse(data.Cpu),
+									corev1.ResourceMemory: resource.MustParse(data.Memory),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if data.HealthCheck {
+		probe := &corev1.Probe{
+			ProbeHandler: corev1.ProbeHandler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: data.HealthCheckPath,
+					Port: intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: data.ContainerPort,
+					},
+				},
+			},
+			InitialDelaySeconds: 5,
+			PeriodSeconds:       5,
+			TimeoutSeconds:      5,
+			SuccessThreshold:    1,
+			FailureThreshold:    3,
+		}
+		deployment.Spec.Template.Spec.Containers[0].ReadinessProbe = probe
+		deployment.Spec.Template.Spec.Containers[0].LivenessProbe = probe
+	}
+
+	_, err := K8s.ClientSet.AppsV1().Deployments(data.Namespace).Create(context.TODO(), deployment, metav1.CreateOptions{})
+	if err != nil {
+		logger.Error("create deployment error: ", err.Error())
+		return errors.New("create deployment error: " + err.Error())
+	}
+
+	return nil
 }
 
 // toCells 方法將 corev1.Pod 的切片轉換成 DataCell 的切片。

@@ -101,3 +101,30 @@ func (d *deployment) ScaleDeployment(ctx *gin.Context) {
 		"data":    fmt.Sprintf("scale deployment %d success", data),
 	})
 }
+
+func (d *deployment) CreateDeployment(ctx *gin.Context) {
+	var (
+		deployCreate = new(service.DeployCreate)
+		err          = ctx.ShouldBindJSON(deployCreate)
+	)
+	if err = ctx.ShouldBindJSON(deployCreate); err != nil {
+		logger.Error("bind params error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "bind params error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	if err = service.Deployment.CreateDeployment(deployCreate); err != nil {
+		logger.Error("create deployment error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "create deployment error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":    "create deployment success",
+	})
+}
