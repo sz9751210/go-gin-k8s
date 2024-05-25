@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"k8s-go-gin/service"
 	"net/http"
 
@@ -69,5 +70,34 @@ func (d *deployment) GetDeploymentDetail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "success",
 		"data":    data,
+	})
+}
+
+func (d *deployment) ScaleDeployment(ctx *gin.Context) {
+	params := new(struct {
+		DeploymentName string `json:"deployment_name"`
+		Namespace      string `json:"namespace"`
+		ScaleNum       int    `json:"scale_num"`
+	})
+	if err := ctx.Bind(params); err != nil {
+		logger.Error("bind params error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "bind params error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	data, err := service.Deployment.ScaleDeployment(params.DeploymentName, params.Namespace, params.ScaleNum)
+	if err != nil {
+		logger.Error("scale deployment error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "scale deployment error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":    fmt.Sprintf("scale deployment %d success", data),
 	})
 }

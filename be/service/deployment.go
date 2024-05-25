@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,11 +15,11 @@ type deployment struct{}
 
 // 定義列表的返回內容，Item是 deployment 元素列表，Total 為 deployment 總數。
 type DeploymentsResp struct {
-	Total int                `json:"total"`
+	Total int                 `json:"total"`
 	Items []appsv1.Deployment `json:"items"`
 }
 
-func(d *deployment) GetDeployments(filterName, namespace string, limit, page int) (deploymentsResp *DeploymentsResp, err error) {
+func (d *deployment) GetDeployments(filterName, namespace string, limit, page int) (deploymentsResp *DeploymentsResp, err error) {
 	deploymentList, err := K8s.ClientSet.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		logger.Error("get deployment list error: ", err.Error())
@@ -41,7 +40,7 @@ func(d *deployment) GetDeployments(filterName, namespace string, limit, page int
 	filtered := selectableData.Filter()
 	total := len(filtered.GenericDataList)
 
-	data  := filtered.Sort().Paginate()
+	data := filtered.Sort().Paginate()
 	deployments := d.fromCells(data.GenericDataList)
 	deploymentsResp = &DeploymentsResp{
 		Total: total,
@@ -51,7 +50,7 @@ func(d *deployment) GetDeployments(filterName, namespace string, limit, page int
 	return deploymentsResp, nil
 }
 
-func(d *deployment) GetDeploymentDetail(deloymentName, namespace string)(deployment *appsv1.Deployment, err error) {
+func (d *deployment) GetDeploymentDetail(deloymentName, namespace string) (deployment *appsv1.Deployment, err error) {
 	deployment, err = K8s.ClientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deloymentName, metav1.GetOptions{})
 	if err != nil {
 		logger.Error("get deployment detail error: ", err.Error())
@@ -60,6 +59,23 @@ func(d *deployment) GetDeploymentDetail(deloymentName, namespace string)(deploym
 	return deployment, nil
 }
 
+func (d *deployment) ScaleDeployment(deploymentName, namespace string, scaleNum int) (replica int32, err error) {
+	scale, err := K8s.ClientSet.AppsV1().Deployments(namespace).GetScale(context.TODO(), deploymentName, metav1.GetOptions{})
+	if err != nil {
+		logger.Error("get deployment scale error: ", err.Error())
+		return 0, errors.New("get deployment scale error" + err.Error())
+	}
+	// 修改 scale 的副本數
+	scale.Spec.Replicas = int32(scaleNum)
+
+	// 更新 scale 的副本數，返回更新後的副本數
+	newScale, err := K8s.ClientSet.AppsV1().Deployments(namespace).UpdateScale(context.TODO(), deploymentName, scale, metav1.UpdateOptions{})
+	if err != nil {
+		logger.Error("update deployment scale error: ", err.Error())
+		return 0, errors.New("update deployment scale error" + err.Error())
+	}
+	return newScale.Spec.Replicas, nil
+}
 
 // toCells 方法將 corev1.Pod 的切片轉換成 DataCell 的切片。
 func (d *deployment) toCells(deployments []appsv1.Deployment) []DataCell {
