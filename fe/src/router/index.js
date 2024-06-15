@@ -33,6 +33,13 @@ const routes = [
         meta: { title: "Pod", requireAuth: true },
         component: () => import("@/views/workload/Pod.vue"),
       },
+      {
+        path: "/workload/pod",
+        name: "Deploy",
+        icon: "el-icon-document-add",
+        meta: { title: "Pod", requireAuth: true },
+        component: () => import("@/views/workload/Pod.vue"),
+      },
     ],
   },
   {

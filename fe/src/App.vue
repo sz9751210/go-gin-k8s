@@ -1,5 +1,5 @@
 <template>
-  <span>我是App.vue</span>
+  <!-- <span>我是App.vue</span> -->
   <router-view></router-view>
 </template>
 
