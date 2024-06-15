@@ -9,7 +9,9 @@
           <div class="aside-logo">
             <el-image class="logo-image" :src="logo" />
             <span :class="[isCollapse ? 'is-collapse' : '']">
-              <span class="logo-name">Kubernetes</span>
+              <transition name="fade" @after-enter="showText = true">
+                <span class="logo-name" v-if="showText">Kubernetes</span>
+              </transition>
             </span>
           </div>
         </el-affix>
@@ -41,6 +43,7 @@
               </template>
             </el-menu-item>
             <!-- 第二種情況，children 大於一個子菜單  -->
+             <!-- 注意 el-menu-item 在折疊後，title 的部分會自動消失，但 el-sub-menu 不會，需要自己控制，因此在 template title 裏面，要將 menu.name 的部分做邏輯判斷 -->
             <el-sub-menu
               class="aside-submenu"
               v-else-if="menu.children && menu.children.length > 1"
@@ -51,9 +54,9 @@
                 <el-icon>
                   <component :is="menu.icon" />
                 </el-icon>
-                <span :class="[isCollapse ? 'is-collapse' : '']">{{
-                  menu.name
-                }}</span>
+                <span :class="[isCollapse ? 'is-collapse' : '']">
+                  {{ menu.name }}
+                </span>
               </template>
               <!-- 處理子菜單 -->
               <el-menu-item
@@ -70,13 +73,30 @@
           </div>
         </el-menu>
       </el-aside>
-    </el-container>
 
-    <!-- <el-container>
-        <el-header>Header</el-header>
+      <el-container>
+        <el-header class="header">
+          <el-row :gutter="20">
+            <!-- 折疊按鈕 -->
+            <el-col>
+              <div class="header-collapse" @click="onCollapse">
+                <el-icon>
+                  <!-- isCollapse為true，表示關閉，icon顯示為展開 -->
+                  <component :is="isCollapse ? 'expand' : 'fold'" />
+                </el-icon>
+              </div>
+            </el-col>
+            <!-- 麵包屑 -->
+            <el-col>2</el-col>
+            <!-- 用戶訊息 -->
+            <el-col>3</el-col>
+          </el-row>
+          Header
+        </el-header>
         <el-main><router-view></router-view></el-main>
         <el-footer>Footer</el-footer>
-    </el-container> -->
+      </el-container>
+    </el-container>
   </div>
 </template>
 
@@ -89,8 +109,30 @@ export default {
       logo: require("@/assets/k8s-metrics.png"),
       asideWidth: "220px",
       isCollapse: false,
+      showText: false,
       routers: [],
     };
+  },
+  methods: {
+    onCollapse() {
+      // 當前狀態是折疊的，點擊後展開
+      // 如果是折疊狀態，就要執行展開的動作
+      if (this.isCollapse) {
+        // 展開後寬度調整為220px
+        this.asideWidth = "220px";
+        // 將狀態改為false，代表狀態是展開
+        this.isCollapse = false;
+        // 等待過渡結束後顯示文本
+        setTimeout(() => {
+          this.showText = true;
+        }, 300); // 500 毫秒是 transition 時間
+      } else {
+        // 當前狀態是展開的，點擊後折疊
+        this.asideWidth = "64px";
+        this.isCollapse = true;
+        this.showText = false;
+      }
+    },
   },
   beforeMount() {
     this.routers = useRouter().options.routes;
@@ -123,6 +165,12 @@ export default {
 .is-collapse {
   display: none;
 }
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0;
+}
 /* 菜單欄滾軸不顯示 */
 .aside::-webkit-scrollbar {
   display: none;
@@ -130,10 +178,10 @@ export default {
 .aside-affix {
   border-bottom-width: 0;
 }
-/* 右邊邊匡寬度 */
-/* .aside-menu{
+/* 右邊邊框寬度 */
+.aside-menu {
   border-right-width: 0;
-} */
+}
 
 /* 菜单栏的位置以及颜色 */
 /* 內邊距左邊的距離 */
@@ -148,7 +196,7 @@ export default {
   background-color: #142c4e;
 }
 
-.aside-submenu{
+.aside-submenu {
   padding-left: 0px !important;
 }
 
@@ -160,5 +208,16 @@ export default {
 }
 .aside-menu-childitem:hover {
   background-color: #142c4e;
+}
+
+/* header */
+.header {
+  z-index: 1200;
+  line-height: 60px;
+  font-size: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+}
+.header-collapse {
+  cursor: pointer;
 }
 </style>
