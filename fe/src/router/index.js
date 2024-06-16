@@ -6,6 +6,10 @@ import Layout from "@/layout/Layout.vue";
 
 const routes = [
   {
+    path: "/",
+    redirect: "/home",
+  },
+  {
     path: "/layout",
     icon: "odometer",
     component: Layout,

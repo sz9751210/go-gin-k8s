@@ -43,7 +43,7 @@
               </template>
             </el-menu-item>
             <!-- 第二種情況，children 大於一個子菜單  -->
-             <!-- 注意 el-menu-item 在折疊後，title 的部分會自動消失，但 el-sub-menu 不會，需要自己控制，因此在 template title 裏面，要將 menu.name 的部分做邏輯判斷 -->
+            <!-- 注意 el-menu-item 在折疊後，title 的部分會自動消失，但 el-sub-menu 不會，需要自己控制，因此在 template title 裏面，要將 menu.name 的部分做邏輯判斷 -->
             <el-sub-menu
               class="aside-submenu"
               v-else-if="menu.children && menu.children.length > 1"
@@ -76,9 +76,9 @@
 
       <el-container>
         <el-header class="header">
-          <el-row :gutter="20">
+          <el-row :gutter="10">
             <!-- 折疊按鈕 -->
-            <el-col>
+            <el-col :span="1">
               <div class="header-collapse" @click="onCollapse">
                 <el-icon>
                   <!-- isCollapse為true，表示關閉，icon顯示為展開 -->
@@ -87,14 +87,56 @@
               </div>
             </el-col>
             <!-- 麵包屑 -->
-            <el-col>2</el-col>
+            <el-col :span="10">
+              <div class="header-breadcrumb">
+                <el-breadcrumb separator="/">
+                  <!-- 最外層工作台，寫死 -->
+                  <el-breadcrumb-item :to="{ path: '/' }"
+                    >工作台</el-breadcrumb-item
+                  >
+                  <!-- 循環出路由規則中的父name和子name -->
+                  <template
+                    v-for="(matched, m) in this.$route.matched"
+                    :key="m"
+                  >
+                    <el-breadcrumb-item v-if="matched.name != undefined">
+                      {{ matched.name }}
+                    </el-breadcrumb-item>
+                  </template>
+                </el-breadcrumb>
+              </div>
+            </el-col>
             <!-- 用戶訊息 -->
-            <el-col>3</el-col>
+            <el-col :span="13">
+              <div class="header-user">
+                <el-dropdown>
+                  <div class="header-dropdown">
+                    <!-- 用戶頭像和用戶名 -->
+                    <el-image class="avator-image" :src="avator"></el-image>
+                    <span>{{ username }}</span>
+                  </div>
+                  <!-- 下拉選單 -->
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item @click="changePassword"
+                        >修改密碼</el-dropdown-item
+                      >
+                      <el-dropdown-item @click="logout">登出</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </el-col>
           </el-row>
-          Header
         </el-header>
-        <el-main><router-view></router-view></el-main>
-        <el-footer>Footer</el-footer>
+        <el-main class="main"><router-view></router-view></el-main>
+        <el-footer class="footer">
+          <!-- 圖標 -->
+           <el-icon class="footer-icon"><place/></el-icon>
+           <!-- 文字內容 -->
+           <a>2024 alan devops</a>
+          </el-footer>
+          <el-backtop target=".main"></el-backtop>
       </el-container>
     </el-container>
   </div>
@@ -107,11 +149,18 @@ export default {
   data() {
     return {
       logo: require("@/assets/k8s-metrics.png"),
+      avator: require("@/assets/avator.png"),
       asideWidth: "220px",
       isCollapse: false,
       showText: false,
       routers: [],
     };
+  },
+  computed: {
+    username() {
+      let username = localStorage.getItem("username");
+      return username ? username : "未知";
+    },
   },
   methods: {
     onCollapse() {
@@ -133,9 +182,16 @@ export default {
         this.showText = false;
       }
     },
+    logout() {
+      localStorage.removeItem("username");
+      localStorage.removeItem("token");
+      this.$router.push("/login");
+    },
   },
   beforeMount() {
     this.routers = useRouter().options.routes;
+
+    console.log(this.routers);
   },
 };
 </script>
@@ -165,7 +221,8 @@ export default {
 .is-collapse {
   display: none;
 }
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s;
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
@@ -219,5 +276,45 @@ export default {
 }
 .header-collapse {
   cursor: pointer;
+}
+
+.header-breadcrumb {
+  /* margin-top: 20px; */
+  padding-top: 0.9em;
+}
+/* 用戶訊息 */
+.avator-image {
+  top: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+/* header */
+.header-user {
+  text-align: right;
+  /* float: right; */
+}
+.header-dropdown {
+  line-height: 60px;
+  cursor: pointer;
+}
+/* main */
+.main {
+  padding: 10px;
+}
+
+/* footer */
+.footer {
+  /* z-index:1200; */
+  text-align: center;
+  color: rgb(187, 184, 184);
+  line-height: 60px;
+  font-size: 14px;
+}
+.footer-icon {
+  width: 2em;
+  top: 3px;
+  font-size: 20px;
 }
 </style>
