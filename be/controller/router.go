@@ -32,5 +32,9 @@ func (r *router) Init(router *gin.Engine) {
 		GET("/api/k8s/deployment/detail", Deployment.GetDeploymentDetail).
 		PUT("/api/k8s/deployment/scale", Deployment.ScaleDeployment).
 		POST("/api/k8s/deployment/create", Deployment.CreateDeployment).
-		DELETE("/api/k8s/deployment/delete", Deployment.DeleteDeployment)
+		DELETE("/api/k8s/deployment/delete", Deployment.DeleteDeployment).
+		// namespace操作
+		GET("/api/k8s/namespaces", Namespace.GetNamespaces).
+		GET("/api/k8s/namespace/detail", Namespace.GetNamespaceDetail).
+		DELETE("/api/k8s/namespace/delete", Namespace.DeleteNamespace)
 }

@@ -115,3 +115,13 @@ func (d deploymentCell) GetCreation() time.Time {
 func (d deploymentCell) GetName() string {
 	return d.Name
 }
+
+type namespaceCell corev1.Namespace
+
+func (ns namespaceCell) GetCreation() time.Time {
+	return ns.CreationTimestamp.Time
+}
+
+func (ns namespaceCell) GetName() string{
+	return ns.Name
+}
