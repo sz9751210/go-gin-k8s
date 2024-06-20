@@ -102,3 +102,11 @@ export default {
   padding: "10px";
 }
 </style>
+
+<style scoped>
+.deploy-head-card,
+.deplou-body-card {
+  border-radius: 1px;
+  margin-bottom: 5px;
+}
+</style>
