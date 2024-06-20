@@ -66,7 +66,13 @@ export default {
         })
         .catch((res) => {
           this.$message.error({
-            message: res.msg,
+            message:
+              "name: " +
+              res.name +
+              " msg: " +
+              res.message +
+              " code: " +
+              res.code,
           });
         });
     },
