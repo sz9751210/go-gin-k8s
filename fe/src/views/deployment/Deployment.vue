@@ -39,10 +39,57 @@
         </div>
       </el-col>
       <!-- 頭部二 -->
-      <el-col :span="24"></el-col>
+      <el-col :span="24">
+        <div>
+          <el-card
+            class="deploy-head-card"
+            shadow="never"
+            body-style="padding: 10px"
+          >
+            <el-row>
+              <!-- 創建按鈕 -->
+              <el-col :span="2">
+                <div>
+                  <!-- 點擊打開抽屜，填入創建deployment需要的數據 -->
+                  <el-button
+                    style="border-radius: 2px"
+                    icon="Edit"
+                    type="primary"
+                    @click="createDeploymentDrawer = true"
+                    v-loading.fullscreen.lock="fullscreenLoading"
+                    >創建</el-button
+                  >
+                </div>
+              </el-col>
+              <!-- 搜索框和搜索按鈕 -->
+              <el-col :span="6">
+                <div>
+                  <el-input
+                    class="deploy-head-search"
+                    clearable
+                    placeholder="請輸入"
+                    v-model="searchInput"
+                  ></el-input>
+                  <el-button
+                    style="border-radius: 2px"
+                    icon="Search"
+                    type="primary"
+                    plain
+                    >搜索</el-button
+                  >
+                </div>
+              </el-col>
+            </el-row>
+          </el-card>
+        </div>
+      </el-col>
       <!-- 頭部三 -->
       <el-col :span="24"></el-col>
     </el-row>
+    <!-- 抽屜：創建Deployment表單 -->
+    <!-- v-model值是bool，用於顯示與隱藏 -->
+    <!-- direction 顯示的位置 -->
+    <!-- before-close 關閉時觸發，點擊關閉或者點擊空白都會觸發 -->
   </div>
 </template>
 
