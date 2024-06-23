@@ -1,6 +1,7 @@
 export default {
     k8sNamespaceList: 'http://localhost:9090/api/k8s/namespaces',
     k8sDeploymentCreate: 'http://localhost:9090/api/k8s/deployment/create',
+    k8sDeploymentList: 'http://localhost:9090/api/k8s/deployments',
 
     // 編輯器設定
     cmOption:{

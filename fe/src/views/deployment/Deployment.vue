@@ -83,8 +83,184 @@
           </el-card>
         </div>
       </el-col>
-      <!-- 頭部三 -->
-      <el-col :span="24"></el-col>
+      <!-- 數據表格 -->
+      <el-col :span="24">
+        <div>
+          <!-- 包一層卡片 -->
+          <el-card
+            class="deploy-body-card"
+            shadow="never"
+            body-style="padding: 5px"
+          >
+            <!-- 數據表格 -->
+            <!-- v-loading用於加載時的 loading 動畫 -->
+            <el-table
+              style="width: 100%; font-size: 12px; margin-bottom: 10px"
+              :data="deploymentList"
+              v-loading="appLoading"
+            >
+              <!-- 最左側留出 20px的寬度，更加沒關 -->
+              <el-table-column width="20"> </el-table-column>
+              <!-- deployment name -->
+              <el-table-column align="left" label="Deployment Name">
+                <template v-slot="scope">
+                  <a class="deploy-body-deployname">
+                    {{ scope.row.metadata.name }}
+                  </a>
+                </template>
+              </el-table-column>
+              <!-- 標籤 -->
+              <el-table-column align="center" label="Labels">
+                <template v-slot="scope">
+                  <!-- for循環，每個label只顯示固定長度，滑鼠懸停後氣泡彈出框顯示完整長度  -->
+                  <div
+                    v-for="(label, key) in scope.row.metadata.labels"
+                    :key="key"
+                  >
+                    <!-- 氣泡彈出框，用於提醒完整長度 -->
+                    <!-- placement 彈出位置 -->
+                    <!-- trigger 觸發條件 -->
+                    <!-- content 彈出框內容 -->
+                    <el-popover
+                      placement="right"
+                      :width="200"
+                      trigger="hover"
+                      :content="key + ':' + label"
+                    >
+                      <!-- <template #reference>{{
+                        key + ":" + label
+                      }}</template> -->
+                      <template #reference>
+                        <!-- ellipsis 方法用於剪裁字符串 -->
+                        <el-tag style="margin-bottom: 5px" type="warning">{{
+                          ellipsis(key + ":" + label)
+                        }}</el-tag>
+                      </template>
+                    </el-popover>
+                  </div>
+                </template>
+              </el-table-column>
+              <!-- 容器組 -->
+              <el-table-column align="center" label="Containers">
+                <!-- 可用數量/總數量，三元運算，若值大於0則顯示，否則顯示0 -->
+                <template v-slot="scope">
+                  <span>
+                    {{
+                      scope.row.status.availableReplicas > 0
+                        ? scope.row.status.availableReplicas
+                        : 0
+                    }}/{{
+                      scope.row.spec.replicas > 0 ? scope.row.spec.replicas : 0
+                    }}
+                  </span>
+                </template>
+              </el-table-column>
+              <!-- 創建時間 -->
+              <el-table-column
+                align="center"
+                label="Created Time"
+                min-width="100"
+              >
+                <template v-slot="scope">
+                  <el-tag type="info">{{
+                    timeTrans(scope.row.metadata.creationTimestamp)
+                  }}</el-tag>
+                </template>
+              </el-table-column>
+              <!-- Image -->
+              <el-table-column align="center" label="Image" min-width="100">
+                <template v-slot="scope">
+                  <div
+                    v-for="(container, index) in scope.row.spec.template.spec
+                      .containers"
+                    :key="index"
+                  >
+                    <el-popover
+                      placement="right"
+                      :width="200"
+                      trigger="hover"
+                      :content="container.image"
+                    >
+                      <template #reference>
+                        <el-tag style="margin-bottom: 5px">
+                          {{
+                            ellipsis(
+                              container.image.split(":")[2] == undefined
+                                ? container.image
+                                : container.image.split(":")[2]
+                            )
+                          }}
+                        </el-tag>
+                      </template>
+                    </el-popover>
+                  </div>
+                </template>
+              </el-table-column>
+              <!-- 操作列，放按鈕 -->
+              <el-table-column align="center" label="操作">
+                <template v-slot="scope">
+                  <el-button
+                    size="small"
+                    style="border-radius: 5px"
+                    icon="Edit"
+                    type="primary"
+                    plain
+                    @click="getDeploymentDetail(scope)"
+                    >YAML
+                  </el-button>
+                  <el-button
+                    size="small"
+                    style="border-radius: 5px"
+                    icon="Plus"
+                    type="primary"
+                    @click="handleScale(scope)"
+                    >擴縮
+                  </el-button>
+                  <el-button
+                    size="small"
+                    style="border-radius: 5px"
+                    icon="RefreshLeft"
+                    type="primary"
+                    @click="handleConfirm(scope, '重啟', 'restartDeployment')"
+                  >
+                    重啟
+                  </el-button>
+                  <el-button
+                    size="small"
+                    style="border-radius: 5px"
+                    icon="Delete"
+                    type="danger"
+                    plain
+                    @click="handleConfirm(scope, '刪除', 'delDeployment')"
+                    >刪除
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <!-- 分頁配置 -->
+            <!-- background 背景色灰色 -->
+            <!-- size-change 單頁大小改變後觸發 -->
+            <!-- current-change 當前頁碼改變後觸發 -->
+            <!-- current-page 當前頁碼 -->
+            <!-- page-size 單頁大小 -->
+            <!-- layout 分頁器支持的功能 -->
+            <!-- total 數據總條數 -->
+            <el-pagination
+            class="deploy-body-pagination"
+            background
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="pagesizeList"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="deploymentTotal"
+            >
+
+            </el-pagination>
+          </el-card>
+        </div>
+      </el-col>
     </el-row>
     <!-- 抽屜：創建Deployment表單 -->
     <!-- v-model值是bool，用於顯示與隱藏 -->
@@ -289,6 +465,23 @@ export default {
           },
         ],
       },
+      // 分頁
+      currentPage: 1,
+      pagesize: 10,
+      pagesizeList: [10, 20, 30],
+      // 列表
+      appLoading: false,
+      deploymentList: [],
+      deploymentTotal: 0,
+      getDeploymentData: {
+        url: common.k8sDeploymentList,
+        params: {
+          filter_name: "",
+          namespace: "",
+          page: "",
+          limit: "",
+        },
+      },
     };
   },
   methods: {
@@ -403,12 +596,58 @@ export default {
         }
       });
     },
+    // 頁面數量發生變化時觸發
+    handleSizeChange(size){
+      this.pagesize = size
+      this.getDeployments()
+    },
+    // 當前頁碼發生變化時觸發
+    handleCurrentChange(currentPage){
+      this.currentPage = currentPage
+      this.getDeployments()
+    },
+    ellipsis(value) {
+      return value.length > 15 ? value.substring(0, 15) + "..." : value;
+    },
+    // 格林威治時間轉換為本地時間
+    timeTrans(timestamp) {
+      let date = new Date(new Date(timestamp).getTime() + 8 * 3600 * 1000);
+      date = date.toJSON();
+      date = date.substring(0, 19).replace("T", " ");
+      return date;
+    },
+    getDeployments() {
+      // 表格加載動畫開啟
+      this.appLoading = true;
+      // getDeploymentsData用於發起deployment列表請求的專用對象，裡面有url和params參數，以下是賦值
+      this.getDeploymentData.params.filter_name = this.searchInput;
+      this.getDeploymentData.params.namespace = this.namespaceValue;
+      this.getDeploymentData.params.page = this.currentPage;
+      this.getDeploymentData.params.limit = this.pagesize;
+      httpClient
+        .get(this.getDeploymentData.url, this.getDeploymentData.params)
+        .then((res) => {
+          this.deploymentList = res.data.items;
+          this.deploymentTotal = res.data.total;
+          // 表格加載動畫關閉
+          // this.appLoading = false;
+        })
+        .catch((res) => {
+          this.$message.error({
+            message: res.msg,
+          });
+        });
+      // 表格加載動畫關閉
+      this.appLoading = false;
+    },
   },
   watch: {
     namespaceValue: {
       handler() {
         // 將 namespace 的值放入本地，用於 path 切換時依舊能獲取到
         localStorage.setItem("namespace", this.namespaceValue);
+        this.currentPage = 1
+        this.getDeployments()
       },
     },
   },
@@ -420,6 +659,7 @@ export default {
       this.namespaceValue = localStorage.getItem("namespace");
     }
     this.getNamespaces();
+    this.getDeployments();
   },
 };
 </script>
@@ -435,5 +675,15 @@ export default {
 .deploy-head-search {
   width: 160px;
   margin-right: 10px;
+}
+/* 數據表格 deployment name 顏色 */
+.deploy-body-deployname{
+  color: #4795EE
+}
+/* deployment name hover */
+.deploy-body-deployname:hover{
+  color: rgb(84,138,238);
+  cursor: pointer;
+  font-weight: bold;
 }
 </style>
