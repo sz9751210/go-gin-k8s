@@ -246,17 +246,16 @@
             <!-- layout 分頁器支持的功能 -->
             <!-- total 數據總條數 -->
             <el-pagination
-            class="deploy-body-pagination"
-            background
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="currentPage"
-            :page-sizes="pagesizeList"
-            :page-size="pageSize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="deploymentTotal"
+              class="deploy-body-pagination"
+              background
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="currentPage"
+              :page-sizes="pagesizeList"
+              :page-size="pageSize"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="deploymentTotal"
             >
-
             </el-pagination>
           </el-card>
         </div>
@@ -409,12 +408,37 @@
         >
       </template>
     </el-drawer>
+    <!-- 展示 yaml 訊息的彈框 -->
+    <el-dialog title="YAML INFO" v-model="yamlDialog" width="45%" top="2%">
+      <!-- codemirror 編輯器 -->
+      <!-- border 帶邊框 -->
+      <!-- options 編輯器配置 -->
+      <!-- change 編輯器中的內容變化時觸發 -->
+      <codemirror
+        :value="contentYaml"
+        border
+        :options="cmOptions"
+        height="500"
+        style="font-style: 14px"
+        @change="onChange"
+      ></codemirror>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="yamlDialog = false">Cancel</el-button>
+          <el-button type="primary" @click="updateDeployment()"
+            >Update</el-button
+          >
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import common from "../common/Config.js";
 import httpClient from "../../utils/request.js";
+import json2yaml from "json2yaml";
+import yaml2obj from "js-yaml";
 export default {
   data() {
     return {
@@ -480,6 +504,27 @@ export default {
           namespace: "",
           page: "",
           limit: "",
+        },
+      },
+      // 編輯器配置
+      cmOptions: common.cmOptions,
+      contentYaml: "",
+      // 詳情
+      deploymentDetail: {},
+      getDeploymentDetailData: {
+        url: common.k8sDeploymentDetail,
+        params: {
+          deployment_name: "",
+          namespace: "",
+        },
+      },
+      // yaml 更新
+      yamlDialog: false,
+      updateDeploymentData: {
+        url: common.k8sDeploymentUpdate,
+        params: {
+          namespace: "",
+          content: "",
         },
       },
     };
@@ -597,14 +642,14 @@ export default {
       });
     },
     // 頁面數量發生變化時觸發
-    handleSizeChange(size){
-      this.pagesize = size
-      this.getDeployments()
+    handleSizeChange(size) {
+      this.pagesize = size;
+      this.getDeployments();
     },
     // 當前頁碼發生變化時觸發
-    handleCurrentChange(currentPage){
-      this.currentPage = currentPage
-      this.getDeployments()
+    handleCurrentChange(currentPage) {
+      this.currentPage = currentPage;
+      this.getDeployments();
     },
     ellipsis(value) {
       return value.length > 15 ? value.substring(0, 15) + "..." : value;
@@ -625,7 +670,9 @@ export default {
       this.getDeploymentData.params.page = this.currentPage;
       this.getDeploymentData.params.limit = this.pagesize;
       httpClient
-        .get(this.getDeploymentData.url, this.getDeploymentData.params)
+        .get(this.getDeploymentData.url, {
+          params: this.getDeploymentData.params,
+        })
         .then((res) => {
           this.deploymentList = res.data.items;
           this.deploymentTotal = res.data.total;
@@ -640,14 +687,52 @@ export default {
       // 表格加載動畫關閉
       this.appLoading = false;
     },
+    // json to yaml
+    transYaml(content) {
+      return json2yaml.stringify(content);
+    },
+    // yaml to obj
+    transObj(content) {
+      return yaml2obj.load(content);
+    },
+    // 編輯器內容變化時觸發的方式
+    // codemirror 的 value 是綁定 contentYaml
+    onChange(val) {
+      this.contentYaml = val;
+    },
+    // 獲取 deployment 詳情，e參數表示傳入的scope插槽，row是該行的數據
+    getDeploymentDetail(e) {
+      this.getDeploymentDetailData.params.deployment_name = e.row.metadata.name;
+      this.getDeploymentDetailData.params.namespace = this.namespaceValue;
+      httpClient
+        .get(this.getDeploymentDetailData.url, {
+          params: this.getDeploymentDetailData.params,
+        })
+        .then((res) => {
+          // 響應成功，獲取詳情
+          this.deploymentDetail = res.data;
+          // console.log(this.deploymentDetail);
+          // 將對象轉成 yaml 格式
+          this.contentYaml = this.transYaml(this.deploymentDetail);
+          console.log(this.contentYaml);
+          // 打開彈出框
+          // this.deploymentDetailDrawer = true;
+          this.yamlDialog = true;
+        })
+        .catch((res) => {
+          this.$message.error({
+            message: res.msg,
+          });
+        });
+    },
   },
   watch: {
     namespaceValue: {
       handler() {
         // 將 namespace 的值放入本地，用於 path 切換時依舊能獲取到
         localStorage.setItem("namespace", this.namespaceValue);
-        this.currentPage = 1
-        this.getDeployments()
+        this.currentPage = 1;
+        this.getDeployments();
       },
     },
   },
@@ -677,12 +762,12 @@ export default {
   margin-right: 10px;
 }
 /* 數據表格 deployment name 顏色 */
-.deploy-body-deployname{
-  color: #4795EE
+.deploy-body-deployname {
+  color: #4795ee;
 }
 /* deployment name hover */
-.deploy-body-deployname:hover{
-  color: rgb(84,138,238);
+.deploy-body-deployname:hover {
+  color: rgb(84, 138, 238);
   cursor: pointer;
   font-weight: bold;
 }

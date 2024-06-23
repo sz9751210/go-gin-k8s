@@ -18,5 +18,6 @@ for (const iconName in ELIcons) {
   app.component(iconName, ELIcons[iconName]);
 }
 app.use(ElementPlus);
+app.use(GlobalCmComponent, { componentName: "codemirror" });
 app.use(router);
 app.mount("#app");
