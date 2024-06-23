@@ -431,6 +431,23 @@
         </span>
       </template>
     </el-dialog>
+    <!-- 調整副本數 -->
+    <el-dialog title="調整副本數" v-model="scaleDialog" width="25%">
+      <el-input-number
+        v-model="scaleNum"
+        :min="0"
+        :max="30"
+        label="描述文字"
+      ></el-input-number>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="scaleDialog = false">Cancel</el-button>
+          <el-button type="primary" @click="scaleDeployment()"
+            >Confirm</el-button
+          >
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -525,6 +542,17 @@ export default {
         params: {
           namespace: "",
           content: "",
+        },
+      },
+      // 擴縮容
+      scaleNum: 0,
+      scaleDialog: false,
+      scaleDeploymentData: {
+        url: common.k8sDeploymentScale,
+        params: {
+          namespace: "",
+          deployment_name: "",
+          scale_num: "",
         },
       },
     };
@@ -724,6 +752,36 @@ export default {
             message: res.msg,
           });
         });
+    },
+    // 擴縮容的中間方法
+    handleScale(e) {
+      // 打開彈出框
+      this.scaleDialog = true;
+      this.deploymentDetail = e.row;
+      // 傳入當前 deployment 的副本數
+      this.scaleNum = e.row.spec.replicas;
+    },
+    // scale deployment
+    scaleDeployment() {
+      this.scaleDeploymentData.params.deployment_name =
+        this.deploymentDetail.metadata.name;
+      this.scaleDeploymentData.params.namespace = this.namespaceValue;
+      this.scaleDeploymentData.params.scale_num = this.scaleNum;
+      httpClient
+        .put(this.scaleDeploymentData.url, this.scaleDeploymentData.params)
+        .then((res) => {
+          this.$message.success({
+            message: res.msg,
+          });
+          // 重新獲取 deployment 列表
+          this.getDeployments();
+        })
+        .catch((res) => {
+          this.$message.error({
+            message: res.msg,
+          });
+        });
+      this.scaleDialog = false;
     },
   },
   watch: {
