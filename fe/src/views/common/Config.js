@@ -5,7 +5,7 @@ export default {
   k8sDeploymentDetail: "http://localhost:9090/api/k8s/deployment/detail",
   k8sDeploymentUpdate: "http://localhost:9090/api/k8s/deployment/update",
   k8sDeploymentScale: "http://localhost:9090/api/k8s/deployment/scale",
-
+  k8sDeploymentRestart: "http://localhost:9090/api/k8s/deployment/restart",
   // 編輯器設定
   cmOptions: {
     // 語言及語法模式

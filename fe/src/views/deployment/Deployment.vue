@@ -100,7 +100,7 @@
               v-loading="appLoading"
             >
               <!-- 最左側留出 20px的寬度，更加沒關 -->
-              <el-table-column width="20"> </el-table-column>
+              <el-table-column width="20px"> </el-table-column>
               <!-- deployment name -->
               <el-table-column align="left" label="Deployment Name">
                 <template v-slot="scope">
@@ -110,7 +110,7 @@
                 </template>
               </el-table-column>
               <!-- 標籤 -->
-              <el-table-column align="center" label="Labels">
+              <el-table-column align="center" label="Labels" width="80">
                 <template v-slot="scope">
                   <!-- for循環，每個label只顯示固定長度，滑鼠懸停後氣泡彈出框顯示完整長度  -->
                   <div
@@ -159,7 +159,7 @@
               <el-table-column
                 align="center"
                 label="Created Time"
-                min-width="100"
+                min-width="80"
               >
                 <template v-slot="scope">
                   <el-tag type="info">{{
@@ -197,8 +197,9 @@
                 </template>
               </el-table-column>
               <!-- 操作列，放按鈕 -->
-              <el-table-column align="center" label="操作">
+              <el-table-column align="center" label="操作" width="400">
                 <template v-slot="scope">
+                  <!-- yaml 詳情 -->
                   <el-button
                     size="small"
                     style="border-radius: 5px"
@@ -208,6 +209,7 @@
                     @click="getDeploymentDetail(scope)"
                     >YAML
                   </el-button>
+                  <!-- 擴縮 -->
                   <el-button
                     size="small"
                     style="border-radius: 5px"
@@ -216,6 +218,7 @@
                     @click="handleScale(scope)"
                     >擴縮
                   </el-button>
+                  <!-- 重啟 -->
                   <el-button
                     size="small"
                     style="border-radius: 5px"
@@ -555,6 +558,14 @@ export default {
           scale_num: "",
         },
       },
+      // 重啟
+      restartDeploymentData: {
+        url: common.k8sDeploymentRestart,
+        params: {
+          deployment_name: "",
+          namespace: "",
+        },
+      },
     };
   },
   methods: {
@@ -782,6 +793,46 @@ export default {
           });
         });
       this.scaleDialog = false;
+    },
+    // 重啟 deployment
+    restartDeployment(e) {
+      this.restartDeploymentData.params.deployment_name = e.row.metadata.name;
+      this.restartDeploymentData.params.namespace = this.namespaceValue;
+      httpClient
+        .put(this.restartDeploymentData.url, this.restartDeploymentData.params)
+        .then((res) => {
+          this.$message.success({
+            message: res.msg,
+          });
+          // 重新獲取 deployment 列表
+          this.getDeployments();
+        })
+        .catch((res) => {
+          this.$message.error({
+            message: res.msg,
+          });
+        });
+    },
+    // 彈出確認框，用於危險操作的 double check
+    // obj是行數據(row)，operateName是操作名，fn是操作方法
+    handleConfirm(obj, operateName, fn) {
+      this.confirmContent = "確認繼續 " + operateName + " 操作嗎?";
+      // $confirm用於彈出確認框
+      this.$confirm(this.confirmContent, "提示", {
+        confirmButtonText: "確定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          // restartDeployment(e) or delDeployment(e)
+          fn(obj);
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消操作",
+          });
+        });
     },
   },
   watch: {
