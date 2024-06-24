@@ -566,6 +566,14 @@ export default {
           namespace: "",
         },
       },
+      // 刪除
+      delDeploymentData: {
+        url: common.k8sDeploymentDelete,
+        params: {
+          deployment_name: "",
+          namespace: "",
+        },
+      },
     };
   },
   methods: {
@@ -800,6 +808,27 @@ export default {
       this.restartDeploymentData.params.namespace = this.namespaceValue;
       httpClient
         .put(this.restartDeploymentData.url, this.restartDeploymentData.params)
+        .then((res) => {
+          this.$message.success({
+            message: res.msg,
+          });
+          // 重新獲取 deployment 列表
+          this.getDeployments();
+        })
+        .catch((res) => {
+          this.$message.error({
+            message: res.msg,
+          });
+        });
+    },
+    // 刪除 deployment
+    delDeployment(e) {
+      this.delDeploymentData.params.deployment_name = e.row.metadata.name;
+      this.delDeploymentData.params.namespace = this.namespaceValue;
+      httpClient
+        .delete(this.delDeploymentData.url, {
+          params: this.delDeploymentData.params,
+        })
         .then((res) => {
           this.$message.success({
             message: res.msg,
