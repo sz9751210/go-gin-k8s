@@ -224,7 +224,7 @@
                     style="border-radius: 5px"
                     icon="RefreshLeft"
                     type="primary"
-                    @click="handleConfirm(scope, '重啟', 'restartDeployment')"
+                    @click="handleConfirm(scope, '重啟', restartDeployment)"
                   >
                     重啟
                   </el-button>
@@ -234,7 +234,7 @@
                     icon="Delete"
                     type="danger"
                     plain
-                    @click="handleConfirm(scope, '刪除', 'delDeployment')"
+                    @click="handleConfirm(scope, '刪除', delDeployment)"
                     >刪除
                   </el-button>
                 </template>
