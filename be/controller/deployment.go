@@ -156,3 +156,31 @@ func (d *deployment) DeleteDeployment(ctx *gin.Context) {
 		"data":    nil,
 	})
 }
+
+func (d *deployment) RestartDeployment(ctx *gin.Context) {
+	params := new(struct {
+		DeploymentName string `json:"deployment_name"`
+		Namespace      string `json:"namespace"`
+	})
+	if err := ctx.Bind(params); err != nil {
+		logger.Error("bind params error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "bind params error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	err := service.Deployment.RestartDeployment(params.DeploymentName, params.Namespace)
+	if err != nil {
+		logger.Error("restart deployment error: " + err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "restart deployment error" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "restart deployment success",
+		"data":    nil,
+	})
+}

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/wonderivan/logger"
 	appsv1 "k8s.io/api/apps/v1"
@@ -174,6 +175,30 @@ func (d *deployment) DeleteDeployment(deploymentName, namespace string) error {
 		logger.Error("delete deployment error: ", err.Error())
 		return errors.New("delete deployment error: " + err.Error())
 	}
+	return nil
+}
+
+func (d *deployment) RestartDeployment(deploymentName, namespace string) error {
+	// Get the current deployment
+	deployment, err := K8s.ClientSet.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+	if err != nil {
+		logger.Error("get deployment error: ", err.Error())
+		return errors.New("get deployment error: " + err.Error())
+	}
+
+	// Modify the deployment spec to trigger a rolling update by updating the annotation
+	if deployment.Spec.Template.Annotations == nil {
+		deployment.Spec.Template.Annotations = make(map[string]string)
+	}
+	deployment.Spec.Template.Annotations["kubectl.kubernetes.io/restartedAt"] = metav1.Now().Format(time.RFC3339)
+
+	// Update the deployment
+	_, err = K8s.ClientSet.AppsV1().Deployments(namespace).Update(context.TODO(), deployment, metav1.UpdateOptions{})
+	if err != nil {
+		logger.Error("update deployment error: ", err.Error())
+		return errors.New("update deployment error: " + err.Error())
+	}
+
 	return nil
 }
 
