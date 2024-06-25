@@ -827,7 +827,7 @@ export default {
       this.delDeploymentData.params.namespace = this.namespaceValue;
       httpClient
         .delete(this.delDeploymentData.url, {
-          params: this.delDeploymentData.params,
+          data: this.delDeploymentData.params,
         })
         .then((res) => {
           this.$message.success({
