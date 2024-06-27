@@ -47,6 +47,22 @@ const routes = [
     ],
   },
   {
+    path: "/devops",
+    name: "DevOps",
+    component: Layout,
+    icon: "aim",
+    meta: { title: "devops", requireAuth: true },
+    children: [
+      {
+        path: "/devops/roadmap",
+        name: "RoadMap",
+        icon: "el-icon-document-add",
+        meta: { title: "RoadMap", requireAuth: true },
+        component: () => import("@/views/workload/Pod.vue"),
+      },
+    ],
+  },
+  {
     path: "/404",
     name: "404",
     meta: { title: "Page Not Found", requireAuth: false },
