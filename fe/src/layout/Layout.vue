@@ -3,8 +3,7 @@
     <!-- container 佈局 -->
     <el-container style="height: 100vh">
       <!-- 側邊導覽 -->
-      <el-aside class="aside" :width="asideWidth"
-        >Aside
+      <el-aside class="aside" :width="asideWidth">
         <el-affix class="aside-affix">
           <div class="aside-logo">
             <el-image class="logo-image" :src="logo" />
@@ -66,7 +65,10 @@
                 :index="child.path"
               >
                 <template #title>
-                  {{ child.name }}
+                  <el-icon>
+                    <component :is="child.icon" />
+                  </el-icon>
+                {{ child.name }}
                 </template>
               </el-menu-item>
             </el-sub-menu>
@@ -132,11 +134,11 @@
         <el-main class="main"><router-view></router-view></el-main>
         <el-footer class="footer">
           <!-- 圖標 -->
-           <el-icon class="footer-icon"><place/></el-icon>
-           <!-- 文字內容 -->
-           <a>2024 alan devops</a>
-          </el-footer>
-          <el-backtop target=".main"></el-backtop>
+          <el-icon class="footer-icon"><place /></el-icon>
+          <!-- 文字內容 -->
+          <a>2024 alan devops</a>
+        </el-footer>
+        <el-backtop target=".main"></el-backtop>
       </el-container>
     </el-container>
   </div>

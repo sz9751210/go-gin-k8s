@@ -33,7 +33,7 @@ const routes = [
       {
         path: "/workload/pod",
         name: "Pod",
-        icon: "el-icon-document-add",
+        icon: "",
         meta: { title: "Pod", requireAuth: true },
         component: () => import("@/views/workload/Pod.vue"),
       },
@@ -56,9 +56,16 @@ const routes = [
       {
         path: "/devops/roadmap",
         name: "RoadMap",
-        icon: "el-icon-document-add",
+        icon: "reading",
         meta: { title: "RoadMap", requireAuth: true },
-        component: () => import("@/views/workload/Pod.vue"),
+        component: () => import("@/views/devops/RoadMap.vue"),
+      },
+      {
+        path: "/devops/linklist",
+        name: "Link List",
+        icon: "list",
+        meta: { title: "Link List", requireAuth: true },
+        component: () => import("@/views/devops/LinkList.vue"),
       },
     ],
   },
