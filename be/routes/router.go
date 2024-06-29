@@ -1,16 +1,18 @@
-package controller
+package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"k8s-go-gin/controller"
 	// "net/http"
 )
 
-var Router router
+// var Router router
 
-type router struct {
-}
+// type router struct {
+// }
 
-func (r *router) Init(router *gin.Engine) {
+func SetupRouter(router *gin.Engine) {
+
 	router.
 		// GET("/ping", func(c *gin.Context) {
 		// 	c.JSON(http.StatusOK, gin.H{
@@ -20,7 +22,7 @@ func (r *router) Init(router *gin.Engine) {
 		// 	})
 		// })
 		// pod操作
-		GET("/api/k8s/pods", Pod.GetPods).
+		GET("/api/k8s/pods", Controller.Pod.GetPods).
 		GET("/api/k8s/pod/detail", Pod.GetPodDetail).
 		DELETE("/api/k8s/pod/delete", Pod.DeletePod).
 		PUT("/api/k8s/pod/update", Pod.UpdatePod).
@@ -37,5 +39,7 @@ func (r *router) Init(router *gin.Engine) {
 		// namespace操作
 		GET("/api/k8s/namespaces", Namespace.GetNamespaces).
 		GET("/api/k8s/namespace/detail", Namespace.GetNamespaceDetail).
-		DELETE("/api/k8s/namespace/delete", Namespace.DeleteNamespace)
+		DELETE("/api/k8s/namespace/delete", Namespace.DeleteNamespace).
+		// devops操作
+		GET("/api/devops/linklist")
 }

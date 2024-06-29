@@ -8,9 +8,13 @@ import (
 	"github.com/wonderivan/logger"
 )
 
-var Pod pod
+// var Pod pod
 
-type pod struct{}
+// type pod struct{}
+
+type PodController struct{
+	podService *service.Pod.service
+}
 
 // Controller中的方法入參是gin.Context，用於從上下文中獲取請求參數及定義響應內容
 // 表單參數統一用 form，ctx方法要用bind方法，如果是json格式請用ShouldBindJSON方法
